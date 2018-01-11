@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>guru.nidi</groupId>
+        <artifactId>guru-nidi-parent-pom</artifactId>
+        <version>1.1.6</version>
+        <relativePath />
+    </parent>
+
+    <artifactId>mbrola-jvm-parent</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <name>${project.artifactId}</name>
+    <description>JVM wrapper around MBROLA diphone synthesizer</description>
+    <url>https://github.com/nidi3/mbrola-jvm</url>
+    <inceptionYear>2018</inceptionYear>
+
+    <properties>
+        <kotlin.version>1.2.0</kotlin.version>
+    </properties>
+
+    <modules>
+        <module>mbrola-jvm</module>
+        <module>mbrola-jvm-common</module>
+        <module>mbrola-jvm-voices</module>
+        <module>mbrola-jvm-linux</module>
+        <module>mbrola-jvm-macos</module>
+        <module>mbrola-jvm-windows</module>
+    </modules>
+
+    <scm>
+        <connection>scm:git:https://github.com/nidi3/mbrola-jvm</connection>
+        <developerConnection>scm:git:https://github.com/nidi3/mbrola-jvm</developerConnection>
+        <url>https://github.com/nidi3/mbrola-jvm</url>
+    </scm>
+
+    <build>
+        <sourceDirectory>src/main/kotlin</sourceDirectory>
+        <testSourceDirectory>src/test/kotlin</testSourceDirectory>
+        <plugins>
+            <plugin>
+                <artifactId>kotlin-maven-plugin</artifactId>
+                <configuration>
+                    <jvmTarget>1.8</jvmTarget>
+                </configuration>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <version>${kotlin.version}</version>
+                <executions>
+                    <execution>
+                        <id>compile</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>test-compile</id>
+                        <phase>test-compile</phase>
+                        <goals>
+                            <goal>test-compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
