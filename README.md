@@ -1,9 +1,9 @@
 # mbrola-jvm
 A JVM wrapper around [MBROLA](http://tcts.fpms.ac.be/synthesis/mbrola.html) diphone synthesizer.
 
-- mbrola-jvm-linux, mbrola-hvm-macos, mbrola-jvm-windows contain the corresponding native MBROLA executables.
-- mbrola-jvm combines the three platform specific modules.
-- mbrola-jvm-voices contains all available voices for MBROLA.
+- `mbrola-jvm-linux`, `mbrola-jvm-macos`, `mbrola-jvm-windows` contain the corresponding native MBROLA executables.
+- `mbrola-jvm` combines the three platform specific modules.
+- `mbrola-jvm-voices` contains all available voices for MBROLA.
 
 ## Usage
 Add a dependency to a platform specific executable
@@ -18,7 +18,7 @@ or to all platforms
 ```xml
 <dependency>
     <groupId>guru.nidi</groupId>
-    <artifactId>mbrola-jvm-macos</artifactId>
+    <artifactId>mbrola-jvm</artifactId>
     <version>0.0.1</version>
 </dependency> 
 ```
