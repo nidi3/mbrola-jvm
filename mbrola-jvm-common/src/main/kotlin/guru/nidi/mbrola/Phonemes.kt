@@ -17,7 +17,7 @@ package guru.nidi.mbrola
 
 import java.io.File
 
-class Phonemes(val phonemes: List<Phoneme>) {
+data class Phonemes(val phonemes: List<Phoneme>) {
     fun toString(speed: Double, pitch: Int) = phonemes.joinToString("\n") { it.toString(speed, pitch) }
 
     companion object {
@@ -39,7 +39,7 @@ class Phonemes(val phonemes: List<Phoneme>) {
 
         @JvmStatic
         fun fromString(phonemes: String): Phonemes {
-            val phs = mutableListOf(Phoneme("_", 10, listOf(Pair(0, 100))))
+            val phs = mutableListOf<Phoneme>()
             val parts = phonemes.split(Regex("\\s+")).filter { it.isNotEmpty() }
             var i = 0
             while (i < parts.size) {

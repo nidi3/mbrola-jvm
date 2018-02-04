@@ -15,6 +15,7 @@
  */
 package guru.nidi.mbrola
 
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.io.File
 
@@ -22,8 +23,10 @@ class PhonemesTest {
     @Test
     fun fromFile() {
         val phs = Phonemes.fromFile(File("src/test/resources/morgen.pho"))
-        Mbrola(phs, Voice.fromFile(File("mbrola-jvm-voices/src/main/resources/nl2/nl2"))).run().use {
-            it.play(true)
-        }
+        val expect = Phonemes.fromString("_ G 10 204 73 219 88 219 u 54 35 192 d 46 37 187 @ 30 13 142 m 10 135 29 104 95 89 O 78 R G 10 76 @ 32 130 n 36 _ 162 16 141")
+        assertEquals(expect, phs)
+//        Mbrola(phs, Voice.fromFile(File("mbrola-jvm-voices/src/main/resources/nl2/nl2"))).run().use {
+//            it.play(true)
+//        }
     }
 }
