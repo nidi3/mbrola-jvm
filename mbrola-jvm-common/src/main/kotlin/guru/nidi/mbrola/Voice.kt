@@ -31,6 +31,7 @@ class Voice(val primary: String, val second: String) {
     private fun fromClasspath(path: String) {
         if (!file().exists()) {
             Thread.currentThread().contextClassLoader.getResourceAsStream(path).use { from ->
+                if (from == null) throw IllegalArgumentException("$path not found in classpath")
                 file().parentFile.mkdirs()
                 FileOutputStream(file()).use { to ->
                     from.copyTo(to)
@@ -40,10 +41,12 @@ class Voice(val primary: String, val second: String) {
     }
 
     companion object {
+        @JvmStatic
         fun fromFile(file: File) = Voice(file.parentFile.name, file.name).apply {
             fromFile(file)
         }
 
+        @JvmStatic
         fun fromClasspath(path: String) = path.split("/").let { parts ->
             Voice(parts[parts.lastIndex - 1], parts.last()).apply {
                 fromClasspath(path)

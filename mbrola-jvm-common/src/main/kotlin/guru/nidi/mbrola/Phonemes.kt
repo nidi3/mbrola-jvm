@@ -21,10 +21,23 @@ class Phonemes(val phonemes: List<Phoneme>) {
     fun toString(speed: Double, pitch: Int) = phonemes.joinToString("\n") { it.toString(speed, pitch) }
 
     companion object {
-        fun fromFile(file: File) {
-            //TODO
+        @JvmStatic
+        fun fromFile(file: File): Phonemes {
+            return Phonemes(file.readLines().map {
+                val line = it.trim()
+                if (line.startsWith(";")) null
+                else {
+                    val parts = line.split(Regex("[,() \t]+"))
+                    val pitches = mutableListOf<Pair<Int, Int>>()
+                    for (i in 2 until parts.size step 2) {
+                        pitches.add(Pair(parts[i].toInt(), parts[i + 1].toInt()))
+                    }
+                    Phoneme(parts[0], parts[1].toInt(), pitches)
+                }
+            }.filterNotNull())
         }
 
+        @JvmStatic
         fun fromString(phonemes: String): Phonemes {
             val phs = mutableListOf(Phoneme("_", 10, listOf(Pair(0, 100))))
             val parts = phonemes.split(Regex("\\s+")).filter { it.isNotEmpty() }
