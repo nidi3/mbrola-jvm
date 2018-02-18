@@ -17,6 +17,7 @@ package guru.nidi.mbrola
 
 import java.io.File
 import java.io.FileOutputStream
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 object Runner {
@@ -39,7 +40,7 @@ object Runner {
     private fun doRun(name: String, vararg args: String): Waveform {
         val exec = File(work, name)
         if (!exec.exists()) {
-            javaClass.getResourceAsStream("/$name").use { from ->
+            Thread.currentThread().contextClassLoader.getResourceAsStream(name).use { from ->
                 if (from == null) throw IllegalStateException("mbrola implementation $name not found. Make sure you have the corresponding module in the classpath.")
                 FileOutputStream(exec).use { to ->
                     from.copyTo(to)
@@ -49,7 +50,9 @@ object Runner {
         }
         val proc = ProcessBuilder().command(exec.absolutePath, *args).start()
         val ok = proc.waitFor(30, TimeUnit.SECONDS)
-        if (!ok || proc.exitValue() != 0) throw MbrolaExecutionException(proc.inputStream.reader().readText() + proc.errorStream.reader().readText())
+        val output = File(args.last())
+        if (!ok || (proc.exitValue() != 0 && (!output.exists() || output.length() == 0L)))
+            throw MbrolaExecutionException("Executed " + exec.absolutePath + " " + Arrays.toString(args) + "\nResult: " + proc.exitValue().toString() + ": " + proc.inputStream.reader().readText() + proc.errorStream.reader().readText())
         return Waveform(File(args.last()))
     }
 }
