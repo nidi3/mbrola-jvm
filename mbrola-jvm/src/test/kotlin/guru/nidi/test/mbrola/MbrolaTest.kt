@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package guru.nidi.mbrola
+package guru.nidi.test.mbrola
 
+import guru.nidi.mbrola.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.io.File
 
-object MbrolaTest {
+class MbrolaTest {
     @Test
     fun simpleRun() {
         val out = File("target/out.wav")
