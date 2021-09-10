@@ -21,7 +21,8 @@ data class Mbrola private constructor(val input: Phonemes, val output: File, val
                                       val frequency: Double?, val frequencyRatio: Double?, val volume: Double?, val time: Double?) {
 
     constructor(input: Phonemes, voice: Voice, format: Format = Format.WAV) :
-            this(input, File.createTempFile("output", "." + format.name.toLowerCase(), Runner.work), voice, null, null, null, null)
+            this(input, File.createTempFile("output", "." + format.name.lowercase(), Runner.work),
+                voice, null, null, null, null)
 
     fun output(output: File) = Mbrola(input, output, voice, frequency, frequencyRatio, volume, time)
     fun frequency(frequency: Double) = Mbrola(input, output, voice, frequency, frequencyRatio, volume, time)

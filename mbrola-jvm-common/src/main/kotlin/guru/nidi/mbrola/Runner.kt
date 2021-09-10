@@ -28,7 +28,7 @@ object Runner {
     }
 
     fun run(vararg args: String): Waveform {
-        val os = System.getProperty("os.name").toLowerCase()
+        val os = System.getProperty("os.name").lowercase()
         return when {
             os.contains("win") -> doRun("mbrola.exe", *args)
             os.contains("mac") -> doRun("mbrola", *args)
