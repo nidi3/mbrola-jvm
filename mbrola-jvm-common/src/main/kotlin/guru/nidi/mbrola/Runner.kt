@@ -17,7 +17,7 @@ package guru.nidi.mbrola
 
 import java.io.File
 import java.io.FileOutputStream
-import java.util.*
+import java.io.IOException
 import java.util.concurrent.TimeUnit
 
 object Runner {
@@ -28,33 +28,46 @@ object Runner {
     }
 
     fun run(vararg args: String): Waveform {
-        val os = System.getProperty("os.name").toLowerCase()
-        return when {
-            os.contains("win") -> doRun("mbrola.exe", *args)
-            os.contains("mac") -> doRun("mbrola", *args)
-            os.contains("linux") -> doRun("mbrola-linux-i386", *args)
+        val os = System.getProperty("os.name").lowercase()
+
+        val executableFileName = when {
+            os.contains("win") -> "mbrola.exe"
+            os.contains("mac") -> "mbrola"
+            os.contains("linux") ->"mbrola-linux-i386"
             else -> throw IllegalStateException("Unsupported operating system $os")
         }
+
+        return doRun(executableFileName, *args)
     }
 
     private fun doRun(name: String, vararg args: String): Waveform {
-        val exec = File(work, name)
+        var exec = File(work, name)
         if (!exec.exists()) {
             Thread.currentThread().contextClassLoader.getResourceAsStream(name).use { from ->
-                if (from == null) throw IllegalStateException("mbrola implementation $name not found. Make sure you have the corresponding module in the classpath.")
-                FileOutputStream(exec).use { to ->
-                    from.copyTo(to)
+                if (from == null) {
+                    // Use mbrola installed in operating system
+                    exec = File("mbrola")
+                } else {
+                    FileOutputStream(exec).use { to ->
+                        from.copyTo(to)
+                    }
                 }
             }
             exec.setExecutable(true)
         }
-        val proc = ProcessBuilder().command(exec.absolutePath, *args).start()
-        val ok = proc.waitFor(30, TimeUnit.SECONDS)
-        val output = File(args.last())
-        if (!ok || (proc.exitValue() != 0 && (!output.exists() || output.length() == 0L)))
-            throw MbrolaExecutionException("Executed " + exec.absolutePath + " " + Arrays.toString(args) + "\nResult: " + proc.exitValue().toString() + ": " + proc.inputStream.reader().readText() + proc.errorStream.reader().readText())
-        return Waveform(File(args.last()))
+        try {
+            val proc = ProcessBuilder().command(exec.path, *args).start()
+            val ok = proc.waitFor(30, TimeUnit.SECONDS)
+            val output = File(args.last())
+            if (!ok || (proc.exitValue() != 0 && (!output.exists() || output.length() == 0L)))
+                throw MbrolaExecutionException("Executed " + exec.path + " " + args.contentToString() + "\nResult: "
+                        + proc.exitValue().toString() + ": " + proc.inputStream.reader().readText() + proc.errorStream.reader().readText())
+            return Waveform(File(args.last()))
+        } catch (e: IOException) {
+            throw MbrolaExecutionException("Cannot run MBROLA. If you are not using the platform specifc mbrola-jvm-* " +
+                    "modules make sure the mbrola command is available in your OS executables path", e)
+        }
     }
 }
 
-class MbrolaExecutionException(msg: String) : RuntimeException(msg)
+class MbrolaExecutionException(msg: String, cause: Throwable? = null) : RuntimeException(msg, cause)
