@@ -23,7 +23,7 @@ data class Phonemes(val phonemes: List<Phoneme>) {
     companion object {
         @JvmStatic
         fun fromFile(file: File): Phonemes {
-            return Phonemes(file.readLines().map {
+            return Phonemes(file.readLines().mapNotNull {
                 val line = it.trim()
                 if (line.startsWith(";")) null
                 else {
@@ -34,7 +34,7 @@ data class Phonemes(val phonemes: List<Phoneme>) {
                     }
                     Phoneme(parts[0], parts[1].toInt(), pitches)
                 }
-            }.filterNotNull())
+            })
         }
 
         @JvmStatic

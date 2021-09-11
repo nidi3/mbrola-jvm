@@ -18,8 +18,8 @@ package guru.nidi.mbrola
 import java.io.File
 import java.io.FileOutputStream
 
-class Voice(val primary: String, val second: String) {
-    fun file() = File(Runner.work, "$primary/$second")
+class Voice(val primary: String, val secondary: String) {
+    fun file() = File(Runner.work, "$primary/$secondary")
 
     private fun fromFile(file: File) {
         if (!file().exists()) {
