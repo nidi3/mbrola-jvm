@@ -37,7 +37,11 @@ class MbrolaTest {
     @Disabled("Command execution doesn't fail but produces an empty wav")
     fun errorRun() {
         assertThrows(MbrolaExecutionException::class.java) {
-            Runner.run("../mbrola-jvm-voices/src/main/resources/nl2/nl2", "src/test/resources/error.pho", "target/out.wav")
+            Runner.run(
+                "../mbrola-jvm-voices/src/main/resources/nl2/nl2",
+                "src/test/resources/error.pho",
+                "target/out.wav"
+            )
         }
     }
 
