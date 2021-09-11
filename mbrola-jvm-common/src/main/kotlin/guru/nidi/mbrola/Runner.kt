@@ -18,7 +18,6 @@ package guru.nidi.mbrola
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import java.util.*
 import java.util.concurrent.TimeUnit
 
 object Runner {
@@ -66,9 +65,9 @@ object Runner {
             return Waveform(File(args.last()))
         } catch (e: IOException) {
             throw MbrolaExecutionException("Cannot run MBROLA. If you are not using the platform specifc mbrola-jvm-* " +
-                    "modules make sure the mbrola command is available in your OS executables path")
+                    "modules make sure the mbrola command is available in your OS executables path", e)
         }
     }
 }
 
-class MbrolaExecutionException(msg: String) : RuntimeException(msg)
+class MbrolaExecutionException(msg: String, cause: Throwable? = null) : RuntimeException(msg, cause)
