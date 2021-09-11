@@ -64,7 +64,7 @@ object Runner {
                         + proc.exitValue().toString() + ": " + proc.inputStream.reader().readText() + proc.errorStream.reader().readText())
             return Waveform(File(args.last()))
         } catch (e: IOException) {
-            throw MbrolaExecutionException("Cannot run MBROLA. If you are not using the platform specifc mbrola-jvm-* " +
+            throw MbrolaExecutionException("Cannot run MBROLA. If you are not using the platform specific mbrola-jvm-* " +
                     "modules make sure the mbrola command is available in your OS executables path", e)
         }
     }
