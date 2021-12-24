@@ -15,35 +15,39 @@
  */
 package guru.nidi.mbrola
 
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
+import java.io.*
 import java.util.concurrent.TimeUnit
 
-object Runner {
-    val work = File(System.getProperty("java.io.tmpdir"), "mbrola-jvm")
 
-    init {
-        work.mkdirs()
+class Runner(private val dockerContainer: String = "europe-west6-docker.pkg.dev/swiss-wowbagger/docker/mbrola") {
+    private var native = true
+
+    companion object {
+        internal val work = File(System.getProperty("java.io.tmpdir"), "mbrola-jvm")
+
+        init {
+            work.mkdirs()
+        }
     }
 
-    fun run(vararg args: String): Waveform {
+    fun run(voice: File, input: File, output: File, vararg args: String): Waveform {
+        return if (native) runNative(voice, input, output, *args)
+        else runDocker(voice, input, output, *args)
+    }
+
+    fun runNative(voice: File, input: File, output: File, vararg args: String): Waveform {
         val os = System.getProperty("os.name").lowercase()
 
         val executableFileName = when {
             os.contains("win") -> "mbrola.exe"
             os.contains("mac") -> "mbrola"
-            os.contains("linux") ->"mbrola-linux-i386"
+            os.contains("linux") -> "mbrola-linux-i386"
             else -> throw IllegalStateException("Unsupported operating system $os")
         }
 
-        return doRun(executableFileName, *args)
-    }
-
-    private fun doRun(name: String, vararg args: String): Waveform {
-        var exec = File(work, name)
+        var exec = File(work, executableFileName)
         if (!exec.exists()) {
-            Thread.currentThread().contextClassLoader.getResourceAsStream(name).use { from ->
+            Thread.currentThread().contextClassLoader.getResourceAsStream(executableFileName).use { from ->
                 if (from == null) {
                     // Use mbrola installed in operating system
                     exec = File("mbrola")
@@ -55,18 +59,50 @@ object Runner {
             }
             exec.setExecutable(true)
         }
-        try {
-            val proc = ProcessBuilder().command(exec.path, *args).start()
-            val ok = proc.waitFor(30, TimeUnit.SECONDS)
-            val output = File(args.last())
-            if (!ok || (proc.exitValue() != 0 && (!output.exists() || output.length() == 0L)))
-                throw MbrolaExecutionException("Executed " + exec.path + " " + args.contentToString() + "\nResult: "
-                        + proc.exitValue().toString() + ": " + proc.inputStream.reader().readText() + proc.errorStream.reader().readText())
-            return Waveform(File(args.last()))
+        return try {
+            execute(
+                output,
+                executableFileName,
+                *args,
+                voice.canonicalPath,
+                input.canonicalPath,
+                output.canonicalPath
+            )
         } catch (e: IOException) {
-            throw MbrolaExecutionException("Cannot run MBROLA. If you are not using the platform specific mbrola-jvm-* " +
-                    "modules make sure the mbrola command is available in your OS executables path", e)
+            native = false
+            run(voice, input, output, *args)
         }
+    }
+
+    fun runDocker(voice: File, input: File, output: File, vararg args: String): Waveform {
+        return execute(
+            output,
+            "docker",
+            "run",
+            "-v", "${voice.parentFile.parentFile.canonicalPath}:/tmp/voice",
+            "-v", "${input.parentFile.canonicalPath}:/tmp/input",
+            "-v", "${output.parentFile.canonicalPath}:/tmp/output",
+            dockerContainer,
+            "mbrola",
+            *args,
+            "/tmp/voice/${voice.parentFile.name}/${voice.name}",
+            "/tmp/input/${input.name}",
+            "/tmp/output/${output.name}"
+        )
+    }
+
+    private fun execute(output: File, vararg command: String): Waveform {
+        val proc = ProcessBuilder().command(*command).start()
+        val ok = proc.waitFor(30, TimeUnit.SECONDS)
+        if (!ok || (proc.exitValue() != 0 && (!output.exists() || output.length() <= 44L)))
+            throw MbrolaExecutionException(
+                """Executed ${command.contentToString()}
+               Result: ${proc.exitValue()}: 
+               ${proc.inputStream.reader().readText()}
+               ${proc.errorStream.reader().readText()}
+            """
+            )
+        return Waveform(output)
     }
 }
 

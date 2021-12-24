@@ -59,7 +59,7 @@ data class Phonemes(val phonemes: List<Phoneme>) {
 
 data class Phoneme(val phoneme: String, val len: Int, val pitches: List<Pair<Int, Int>>) {
     fun toString(speed: Double, pitch: Int) =
-            phoneme + " " + (len * speed).toInt() + " " + pitches.joinToString(" ") {
-                "${it.first} ${it.second + pitch}"
-            }
+        phoneme + " " + (len * speed).toInt() + " " + pitches.joinToString(" ") {
+            "${it.first} ${it.second + pitch}"
+        }
 }

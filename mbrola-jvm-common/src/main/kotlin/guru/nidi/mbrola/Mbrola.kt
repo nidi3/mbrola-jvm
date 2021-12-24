@@ -17,12 +17,16 @@ package guru.nidi.mbrola
 
 import java.io.File
 
-data class Mbrola private constructor(val input: Phonemes, val output: File, val voice: Voice,
-                                      val frequency: Double?, val frequencyRatio: Double?, val volume: Double?, val time: Double?) {
+data class Mbrola private constructor(
+    val input: Phonemes, val output: File, val voice: Voice,
+    val frequency: Double?, val frequencyRatio: Double?, val volume: Double?, val time: Double?
+) {
 
     constructor(input: Phonemes, voice: Voice, format: Format = Format.WAV) :
-            this(input, File.createTempFile("output", "." + format.name.lowercase(), Runner.work),
-                voice, null, null, null, null)
+            this(
+                input, File.createTempFile("output", "." + format.name.lowercase(), Runner.work),
+                voice, null, null, null, null
+            )
 
     fun output(output: File) = Mbrola(input, output, voice, frequency, frequencyRatio, volume, time)
     fun frequency(frequency: Double) = Mbrola(input, output, voice, frequency, frequencyRatio, volume, time)
@@ -30,15 +34,16 @@ data class Mbrola private constructor(val input: Phonemes, val output: File, val
     fun volume(volume: Double) = Mbrola(input, output, voice, frequency, frequencyRatio, volume, time)
     fun time(time: Double) = Mbrola(input, output, voice, frequency, frequencyRatio, volume, time)
 
-    fun run(): Waveform {
+    fun run(runner: Runner = Runner()): Waveform {
         val inFile = File.createTempFile("input", ".pho", Runner.work).apply {
             writeText(input.toString(1.0, 0))
         }
         try {
-            return Runner.run(*listOfNotNull(
-                    frequency?.let { "-l $it" }, frequencyRatio?.let { "-f $it" },
-                    time?.let { "-t $it" }, volume?.let { "-v $it" },
-                    voice.file().canonicalPath, inFile.canonicalPath, output.canonicalPath).toTypedArray())
+            val args = listOfNotNull(
+                frequency?.let { "-l $it" }, frequencyRatio?.let { "-f $it" },
+                time?.let { "-t $it" }, volume?.let { "-v $it" },
+            )
+            return runner.run(voice.file(), inFile, output, *args.toTypedArray())
         } finally {
             inFile.delete()
         }

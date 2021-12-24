@@ -15,13 +15,33 @@
  */
 package guru.nidi.mbrola
 
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import java.io.File
 
-class MbrolaTest {
+class RunnerTest {
     @Test
-    fun argsRun() {
-        Mbrola(Phonemes.fromString("e n"), Voice.fromClasspath("nl1/nl1")).time(1.5).run().use {
-            it.play(true)
+    fun simpleRun() {
+        val out = File("target/out.wav")
+        out.delete()
+        Runner().run(
+            Voice.fromClasspath("nl2/nl2").file(),
+            File("src/test/resources/simple.pho"),
+            out
+        ).use {
+            assertTrue(out.exists())
+        }
+        assertFalse(out.exists())
+    }
+
+    @Test
+    fun errorRun() {
+        assertThrows(MbrolaExecutionException::class.java) {
+            Runner().run(
+                File("../mbrola-jvm-voices/src/main/resources/nl2/nl2"),
+                File("src/test/resources/error.pho"),
+                File("target/out.wav")
+            )
         }
     }
 }
