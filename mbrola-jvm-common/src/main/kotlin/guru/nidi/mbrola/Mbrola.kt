@@ -47,7 +47,7 @@ class Mbrola(
                 frequency?.let { "-l $it" }, frequencyRatio?.let { "-f $it" },
                 time?.let { "-t $it" }, volume?.let { "-v $it" },
             )
-            consumer(runner.run(voice.file(), inFile, outFile, *args.toTypedArray()))
+            consumer(runner.run(voice.file, inFile, outFile, *args.toTypedArray()))
         } finally {
             inFile.delete()
             outFile.delete()

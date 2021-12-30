@@ -26,7 +26,7 @@ class MbrolaRunnerTest {
         val out = File("target/out.wav")
         out.delete()
         MbrolaRunner().run(
-            Voice.fromClasspath("nl2/nl2").file(),
+            Voice.fromClasspath("nl2/nl2").file,
             File("src/test/resources/simple.pho"),
             out
         )

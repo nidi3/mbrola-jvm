@@ -20,6 +20,6 @@ import org.junit.jupiter.api.Test
 class MbrolaTest {
     @Test
     fun argsRun() {
-        Mbrola(Voice.fromClasspath("nl1/nl1"), time = 1.5).run(Phonemes.fromString("e n")).playAndWait()
+        Mbrola(Voice.fromClasspath("voices/nl1/nl1"), time = 1.5).run(Phonemes.fromString("e n")).playAndWait()
     }
 }

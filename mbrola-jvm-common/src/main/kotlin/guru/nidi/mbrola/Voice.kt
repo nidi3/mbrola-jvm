@@ -18,39 +18,22 @@ package guru.nidi.mbrola
 import java.io.File
 import java.io.FileOutputStream
 
-class Voice(val primary: String, val secondary: String) {
-    fun file() = File(MbrolaRunner.work, "$primary/$secondary")
-
-    private fun fromFile(file: File) {
-        if (!file().exists()) {
-            file().parentFile.mkdirs()
-            file.copyTo(file())
-        }
-    }
-
-    private fun fromClasspath(path: String) {
-        if (!file().exists()) {
-            Thread.currentThread().contextClassLoader.getResourceAsStream(path).use { from ->
-                if (from == null) throw IllegalArgumentException("$path not found in classpath")
-                file().parentFile.mkdirs()
-                FileOutputStream(file()).use { to ->
-                    from.copyTo(to)
-                }
-            }
-        }
-    }
-
+class Voice private constructor(internal val file: File) {
     companion object {
         @JvmStatic
-        fun fromFile(file: File) = Voice(file.parentFile.name, file.name).apply {
-            fromFile(file)
-        }
+        fun fromFile(file: File) = Voice(file)
 
         @JvmStatic
         fun fromClasspath(path: String) = path.split("/").let { parts ->
-            Voice(parts[parts.lastIndex - 1], parts.last()).apply {
-                fromClasspath(path)
+            val file = File(MbrolaRunner.work, "${parts.takeLast(2).joinToString("/")}")
+            if (!file.exists()) {
+                Thread.currentThread().contextClassLoader.getResourceAsStream(path).use { from ->
+                    if (from == null) throw IllegalArgumentException("$path not found in classpath")
+                    file.parentFile.mkdirs()
+                    FileOutputStream(file).use { to -> from.copyTo(to) }
+                }
             }
+            Voice(file)
         }
     }
 }

@@ -77,13 +77,13 @@ class MbrolaRunner(private val dockerContainer: String = "europe-west6-docker.pk
             output,
             "docker",
             "run",
-            "-v", "${voice.parentFile.parentFile.canonicalPath}:/tmp/voice",
+            "-v", "${voice.parentFile.canonicalPath}:/tmp/voice",
             "-v", "${input.parentFile.canonicalPath}:/tmp/input",
             "-v", "${output.parentFile.canonicalPath}:/tmp/output",
             dockerContainer,
             "mbrola",
             *args,
-            "/tmp/voice/${voice.parentFile.name}/${voice.name}",
+            "/tmp/voice/${voice.name}",
             "/tmp/input/${input.name}",
             "/tmp/output/${output.name}"
         )
