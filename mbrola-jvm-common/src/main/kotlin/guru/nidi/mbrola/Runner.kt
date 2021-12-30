@@ -18,7 +18,6 @@ package guru.nidi.mbrola
 import java.io.*
 import java.util.concurrent.TimeUnit
 
-
 class Runner(private val dockerContainer: String = "europe-west6-docker.pkg.dev/swiss-wowbagger/docker/mbrola") {
     private var native = true
 
@@ -42,7 +41,7 @@ class Runner(private val dockerContainer: String = "europe-west6-docker.pkg.dev/
             os.contains("win") -> "mbrola.exe"
             os.contains("mac") -> "mbrola"
             os.contains("linux") -> "mbrola-linux-i386"
-            else -> throw IllegalStateException("Unsupported operating system $os")
+            else -> "mbrola"
         }
 
         var exec = File(work, executableFileName)
@@ -52,9 +51,7 @@ class Runner(private val dockerContainer: String = "europe-west6-docker.pkg.dev/
                     // Use mbrola installed in operating system
                     exec = File("mbrola")
                 } else {
-                    FileOutputStream(exec).use { to ->
-                        from.copyTo(to)
-                    }
+                    FileOutputStream(exec).use { to -> from.copyTo(to) }
                 }
             }
             exec.setExecutable(true)
@@ -62,13 +59,14 @@ class Runner(private val dockerContainer: String = "europe-west6-docker.pkg.dev/
         return try {
             execute(
                 output,
-                executableFileName,
+                exec.path,
                 *args,
                 voice.canonicalPath,
                 input.canonicalPath,
                 output.canonicalPath
             )
         } catch (e: IOException) {
+            println("Could not run native mbrola: '${e.message}', using docker")
             native = false
             run(voice, input, output, *args)
         }
@@ -100,7 +98,7 @@ class Runner(private val dockerContainer: String = "europe-west6-docker.pkg.dev/
                Result: ${proc.exitValue()}: 
                ${proc.inputStream.reader().readText()}
                ${proc.errorStream.reader().readText()}
-            """
+            """.trimIndent()
             )
         return Waveform(output)
     }
