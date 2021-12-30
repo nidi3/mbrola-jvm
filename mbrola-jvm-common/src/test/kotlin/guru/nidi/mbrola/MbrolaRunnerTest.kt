@@ -15,29 +15,28 @@
  */
 package guru.nidi.mbrola
 
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.io.File
 
-class RunnerTest {
+class MbrolaRunnerTest {
     @Test
     fun simpleRun() {
         val out = File("target/out.wav")
         out.delete()
-        Runner().run(
+        MbrolaRunner().run(
             Voice.fromClasspath("nl2/nl2").file(),
             File("src/test/resources/simple.pho"),
             out
-        ).use {
-            assertTrue(out.exists())
-        }
-        assertFalse(out.exists())
+        )
+        assertTrue(out.length() > 0)
     }
 
     @Test
     fun errorRun() {
         assertThrows(MbrolaExecutionException::class.java) {
-            Runner().run(
+            MbrolaRunner().run(
                 File("../mbrola-jvm-voices/src/main/resources/nl2/nl2"),
                 File("src/test/resources/error.pho"),
                 File("target/out.wav")

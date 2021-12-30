@@ -18,7 +18,7 @@ package guru.nidi.mbrola
 import java.io.*
 import java.util.concurrent.TimeUnit
 
-class Runner(private val dockerContainer: String = "europe-west6-docker.pkg.dev/swiss-wowbagger/docker/mbrola") {
+class MbrolaRunner(private val dockerContainer: String = "europe-west6-docker.pkg.dev/swiss-wowbagger/docker/mbrola") {
     private var native = true
 
     companion object {
@@ -29,12 +29,12 @@ class Runner(private val dockerContainer: String = "europe-west6-docker.pkg.dev/
         }
     }
 
-    fun run(voice: File, input: File, output: File, vararg args: String): Waveform {
+    fun run(voice: File, input: File, output: File, vararg args: String): File {
         return if (native) runNative(voice, input, output, *args)
         else runDocker(voice, input, output, *args)
     }
 
-    fun runNative(voice: File, input: File, output: File, vararg args: String): Waveform {
+    fun runNative(voice: File, input: File, output: File, vararg args: String): File {
         val os = System.getProperty("os.name").lowercase()
 
         val executableFileName = when {
@@ -72,7 +72,7 @@ class Runner(private val dockerContainer: String = "europe-west6-docker.pkg.dev/
         }
     }
 
-    fun runDocker(voice: File, input: File, output: File, vararg args: String): Waveform {
+    fun runDocker(voice: File, input: File, output: File, vararg args: String): File {
         return execute(
             output,
             "docker",
@@ -89,7 +89,7 @@ class Runner(private val dockerContainer: String = "europe-west6-docker.pkg.dev/
         )
     }
 
-    private fun execute(output: File, vararg command: String): Waveform {
+    private fun execute(output: File, vararg command: String): File {
         val proc = ProcessBuilder().command(*command).start()
         val ok = proc.waitFor(30, TimeUnit.SECONDS)
         if (!ok || (proc.exitValue() != 0 && (!output.exists() || output.length() <= 44L)))
@@ -100,7 +100,7 @@ class Runner(private val dockerContainer: String = "europe-west6-docker.pkg.dev/
                ${proc.errorStream.reader().readText()}
             """.trimIndent()
             )
-        return Waveform(output)
+        return output
     }
 }
 

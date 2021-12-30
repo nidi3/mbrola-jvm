@@ -17,35 +17,40 @@ package guru.nidi.mbrola
 
 import java.io.File
 
-data class Mbrola private constructor(
-    val input: Phonemes, val output: File, val voice: Voice,
-    val frequency: Double?, val frequencyRatio: Double?, val volume: Double?, val time: Double?
+class Mbrola(
+    private val voice: Voice,
+    private val frequency: Double? = null,
+    private val frequencyRatio: Double? = null,
+    private val volume: Double? = null,
+    private val time: Double? = null,
+    private val format: Format = Format.WAV,
+    private val runner: MbrolaRunner = MbrolaRunner()
 ) {
+    constructor(voice: Voice) : this(voice, null)
 
-    constructor(input: Phonemes, voice: Voice, format: Format = Format.WAV) :
-            this(
-                input, File.createTempFile("output", "." + format.name.lowercase(), Runner.work),
-                voice, null, null, null, null
-            )
+    fun frequency(frequency: Double) = Mbrola(voice, frequency, frequencyRatio, volume, time, format, runner)
+    fun frequencyRatio(frequencyRatio: Double) = Mbrola(voice, frequency, frequencyRatio, volume, time, format, runner)
+    fun volume(volume: Double) = Mbrola(voice, frequency, frequencyRatio, volume, time, format, runner)
+    fun time(time: Double) = Mbrola(voice, frequency, frequencyRatio, volume, time, format, runner)
+    fun format(format: Format) = Mbrola(voice, frequency, frequencyRatio, volume, time, format, runner)
+    fun runner(runner: MbrolaRunner) = Mbrola(voice, frequency, frequencyRatio, volume, time, format, runner)
 
-    fun output(output: File) = Mbrola(input, output, voice, frequency, frequencyRatio, volume, time)
-    fun frequency(frequency: Double) = Mbrola(input, output, voice, frequency, frequencyRatio, volume, time)
-    fun frequencyRatio(frequencyRatio: Double) = Mbrola(input, output, voice, frequency, frequencyRatio, volume, time)
-    fun volume(volume: Double) = Mbrola(input, output, voice, frequency, frequencyRatio, volume, time)
-    fun time(time: Double) = Mbrola(input, output, voice, frequency, frequencyRatio, volume, time)
+    fun run(input: Phonemes): Waveform = run(input) { Waveform(it) }
 
-    fun run(runner: Runner = Runner()): Waveform {
-        val inFile = File.createTempFile("input", ".pho", Runner.work).apply {
+    fun <T> run(input: Phonemes, consumer: (File) -> T): T {
+        val inFile = File.createTempFile("input", ".pho", MbrolaRunner.work).apply {
             writeText(input.toString(1.0, 0))
         }
-        try {
+        val outFile = File.createTempFile("output", "." + format.name.lowercase(), MbrolaRunner.work)
+        return try {
             val args = listOfNotNull(
                 frequency?.let { "-l $it" }, frequencyRatio?.let { "-f $it" },
                 time?.let { "-t $it" }, volume?.let { "-v $it" },
             )
-            return runner.run(voice.file(), inFile, output, *args.toTypedArray())
+            consumer(runner.run(voice.file(), inFile, outFile, *args.toTypedArray()))
         } finally {
             inFile.delete()
+            outFile.delete()
         }
     }
 

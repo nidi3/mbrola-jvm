@@ -18,13 +18,17 @@ package guru.nidi.mbrola
 import java.io.File
 import javax.sound.sampled.*
 
-class Waveform(val file: File) : AutoCloseable {
+class Waveform(file: File) {
+    val bytes = file.readBytes().also { file.delete() }
+
+    val stream get() = bytes.inputStream()
+
     fun playback() = play(false)
 
     fun playAndWait() = play(true)
 
     private fun play(waitUntilDone: Boolean) {
-        AudioSystem.getAudioInputStream(file).use { stream ->
+        AudioSystem.getAudioInputStream(stream).use { stream ->
             val listener = ClosingListener()
             AudioSystem.getClip().apply {
                 addLineListener(listener)
@@ -35,10 +39,6 @@ class Waveform(val file: File) : AutoCloseable {
                 }
             }
         }
-    }
-
-    override fun close() {
-        file.delete()
     }
 }
 

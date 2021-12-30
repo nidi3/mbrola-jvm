@@ -19,7 +19,7 @@ import java.io.File
 import java.io.FileOutputStream
 
 class Voice(val primary: String, val secondary: String) {
-    fun file() = File(Runner.work, "$primary/$secondary")
+    fun file() = File(MbrolaRunner.work, "$primary/$secondary")
 
     private fun fromFile(file: File) {
         if (!file().exists()) {
