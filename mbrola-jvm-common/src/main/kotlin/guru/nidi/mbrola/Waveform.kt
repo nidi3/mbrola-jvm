@@ -19,7 +19,11 @@ import java.io.File
 import javax.sound.sampled.*
 
 class Waveform(val file: File) : AutoCloseable {
-    fun play(waitUntilDone: Boolean) {
+    fun playback() = play(false)
+
+    fun playAndWait() = play(true)
+
+    private fun play(waitUntilDone: Boolean) {
         AudioSystem.getAudioInputStream(file).use { stream ->
             val listener = ClosingListener()
             AudioSystem.getClip().apply {

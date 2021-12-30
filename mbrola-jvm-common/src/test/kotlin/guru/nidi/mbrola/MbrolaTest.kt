@@ -21,7 +21,7 @@ class MbrolaTest {
     @Test
     fun argsRun() {
         Mbrola(Phonemes.fromString("e n"), Voice.fromClasspath("nl1/nl1")).time(1.5).run().use {
-            it.play(true)
+            it.playAndWait()
         }
     }
 }
